@@ -1,0 +1,4 @@
+do my own from ml lec 3
+
+1. other tuning paramters (in svm algo)
+ 2.problem- multi armed bandit (24/07) 

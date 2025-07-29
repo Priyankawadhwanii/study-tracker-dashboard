@@ -1,117 +1,141 @@
-
+from datetime import datetime, timedelta
 import streamlit as st
 import pandas as pd
-import os
-from datetime import datetime, timedelta
-import random
+import plotly.express as px
+import sqlite3
+import time
 
-st.markdown(
-    """
-    <style>
-    .main {
-        background-color: #f8f4fc;
-        color: #4b0082;
-    }
-    .st-cb {
-        background-color: #e7defe !important;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
+# --- Streamlit Page Settings ---
+st.set_page_config(page_title="📚 Priyanka's Personal Study Tracker", page_icon="✨")
+
+# --- Connect to SQLite Database ---
+conn = sqlite3.connect("study_tracker.db", check_same_thread=False)
+cursor = conn.cursor()
+
+# --- Create Table if not exists ---
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS study_sessions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    date TEXT,
+    start_time TEXT,
+    end_time TEXT,
+    duration REAL,
+    topic TEXT,
+    mood TEXT
 )
+''')
+conn.commit()
 
-# --- Motivational Quotes ---
-quotes = [
-    "Consistency beats motivation. 🚀",
-    "Small progress each day adds up to big results. 💪",
-    "Study like your future depends on it. Because it does. ✨",
-    "Discipline is choosing between what you want now and what you want most. 🔥",
-    "Stay patient and trust your journey. 🛤️"
-]
+# --- Function to Calculate Study Streak ---
+def calculate_study_streak(dates):
+    if dates.empty:
+        return 0
+    dates = sorted(set(pd.to_datetime(dates).dt.normalize()), reverse=True)
+    today = datetime.now().date()
+    streak = 0
+    for i, date in enumerate(dates):
+        if date.date() == today - timedelta(days=i):
+            streak += 1
+        else:
+            break
+    return streak
 
-# --- App Title ---
-st.set_page_config(page_title="Study Tracker", page_icon="📚", layout="wide")
+# --- Title ---
 st.title("📚 Personal Study Tracker Dashboard")
+st.markdown("Keep tracking your progress, little steps matter! 🚶‍♀️✨")
 
-# --- Load Data ---
-data_file = "data/study_data.csv"
+# --- Timer with persistent storage ---
+if 'timer_running' not in st.session_state:
+    st.session_state.timer_running = False
+if 'start_time' not in st.session_state:
+    st.session_state.start_time = None
 
-if os.path.exists(data_file):
-    df = pd.read_csv(data_file)
-    df['Date'] = pd.to_datetime(df['Date'])
+st.subheader("🎯 Real-Time Study Timer")
+topic = st.text_input("What are you studying?")
+mood = st.radio("How are you feeling?", ["😄 Happy", "😫 Tired", "😌 Calm", "😤 Frustrated"])
+
+col1, col2, col3 = st.columns(3)
+if col1.button("▶️ Start"):
+    if not st.session_state.timer_running:
+        st.session_state.start_time = datetime.now()
+        st.session_state.timer_running = True
+        st.success("Timer started!")
+
+if col2.button("⏸️ Stop"):
+    if st.session_state.timer_running:
+        end_time = datetime.now()
+        duration = (end_time - st.session_state.start_time).total_seconds() / 3600
+        cursor.execute('''
+            INSERT INTO study_sessions (date, start_time, end_time, duration, topic, mood)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ''', (
+            datetime.now().strftime('%Y-%m-%d'),
+            st.session_state.start_time.strftime('%H:%M:%S'),
+            end_time.strftime('%H:%M:%S'),
+            round(duration, 2),
+            topic,
+            mood
+        ))
+        conn.commit()
+        st.success(f"Saved! Duration: {round(duration, 2)} hours")
+        st.session_state.timer_running = False
+        st.session_state.start_time = None
+
+if col3.button("🔄 Reset"):
+    st.session_state.timer_running = False
+    st.session_state.start_time = None
+
+# --- Display current timer ---
+if st.session_state.timer_running:
+    elapsed = (datetime.now() - st.session_state.start_time).total_seconds() / 3600
 else:
-    st.warning("No data file found. Please ensure 'study_data.csv' exists inside the 'data' folder.")
-    st.stop()
+    elapsed = 0
 
-# --- Sidebar ---
+st.metric("⏳ Timer", f"{elapsed:.2f} hrs")
+
+# --- Load Data from Database ---
+df = pd.read_sql_query("SELECT * FROM study_sessions", conn)
+df['date'] = pd.to_datetime(df['date'])
+
+# --- Sidebar Filters ---
 st.sidebar.header("Filters 🎛️")
-selected_mood = st.sidebar.multiselect("Filter by Mood:", df['Mood'].unique())
-selected_topics = st.sidebar.multiselect("Filter by Topic:", df['Topic'].unique())
+selected_mood = st.sidebar.multiselect("Select Mood:", df['mood'].unique())
+selected_topics = st.sidebar.multiselect("Select Topics:", df['topic'].unique())
 
 filtered_df = df.copy()
 if selected_mood:
-    filtered_df = filtered_df[filtered_df['Mood'].isin(selected_mood)]
+    filtered_df = filtered_df[filtered_df['mood'].isin(selected_mood)]
 if selected_topics:
-    filtered_df = filtered_df[filtered_df['Topic'].isin(selected_topics)]
+    filtered_df = filtered_df[filtered_df['topic'].isin(selected_topics)]
 
-# --- Motivation Quote Section ---
-st.markdown("### 💡 Today's Motivation")
-st.success(random.choice(quotes))
+# --- Study Summary ---
+st.markdown("## 🏆 Study Summary")
+total_hours = filtered_df['duration'].sum()
+days_count = filtered_df['date'].nunique()
+avg_hours = total_hours / days_count if days_count else 0
+streak = calculate_study_streak(filtered_df['date'])
 
-# --- Summary Metrics Section ---
-st.markdown("## 🏆 Your Study Summary")
+col1, col2, col3, col4 = st.columns(4)
+col1.metric("📆 Total Hours", f"{total_hours:.1f} hrs")
+col2.metric("⏳ Avg/Day", f"{avg_hours:.1f} hrs")
+col3.metric("🔥 Streak", f"{streak} days")
+col4.metric("📚 Sessions", f"{len(filtered_df)}")
 
-# This week's hours
-today = datetime.today()
-week_ago = today - timedelta(days=7)
-this_week = df[df['Date'] >= week_ago]
-total_hours_week = this_week['Hours_Studied'].sum()
-
-# Productivity badge logic
-avg_hours = this_week['Hours_Studied'].mean()
-if avg_hours >= 3:
-    badge = "🔥 On Fire!"
-elif avg_hours >= 2:
-    badge = "✅ Consistent!"
-else:
-    badge = "💤 Could Improve!"
-
-col1, col2, col3 = st.columns(3)
-col1.metric("📆 This Week's Hours", f"{total_hours_week} hrs")
-col2.metric("⏳ Avg Hours / Day", f"{avg_hours:.1f} hrs")
-col3.metric("🏅 Productivity Badge", badge)
-
-# --- Study Streak Logic ---
-streak = 0
-df_sorted = df.sort_values(by='Date', ascending=False)
-for date in df_sorted['Date']:
-    if (today - date).days == streak:
-        streak += 1
-    else:
-        break
-st.markdown(f"### 🔥 Current Study Streak: **{streak} days**")
-
-# --- Show Data Table ---
-st.markdown("---")
-st.subheader("📑 Filtered Study Data")
+# --- Show Table ---
+st.subheader("📝 Study Sessions")
 st.dataframe(filtered_df)
 
-# --- Study Hours Visualization ---
-st.markdown("## 📊 Study Hours Over Time")
-st.line_chart(filtered_df.set_index('Date')['Hours_Studied'])
+# --- Charts ---
+st.subheader("📈 Study Hours Over Time")
+fig = px.line(filtered_df, x='date', y='duration', markers=True, title="Study Hours Trend")
+st.plotly_chart(fig)
 
-# --- Mood Visualization ---
-st.markdown("## 😄 Mood Distribution")
-st.bar_chart(filtered_df['Mood'].value_counts())
-
-# --- Difficulty Level ---
-st.markdown("## 📈 Average Difficulty Level")
-st.write(f"Average Difficulty: **{filtered_df['Difficulty (1-5)'].mean():.2f} / 5**")
+st.subheader("😊 Mood Distribution")
+mood_df = filtered_df['mood'].value_counts().reset_index()
+mood_df.columns = ['Mood', 'Count']
+fig2 = px.bar(mood_df, x='Mood', y='Count', color='Mood', title="Mood Patterns")
+st.plotly_chart(fig2)
 
 # --- Footer ---
 st.markdown("---")
-st.caption("✨ Built with ❤️ using Streamlit")
-
-
-
-
+st.caption("Built by Priyanka ✨ Stay consistent, stay awesome!")

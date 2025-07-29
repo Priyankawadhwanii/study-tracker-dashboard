@@ -1,0 +1,29 @@
+Date,Hours_Studied,Topic,Difficulty (1-5),Mood
+22-06-2025,2,Python Loops,3,Tired
+23-06-2025,3,Pandas,2,Happy
+24-06-2025,1,OOP,4,Stressed
+25-06-2025,2,Matplotlib,3,Calm
+26-06-2025,4,Seaborn,2,Happy
+27-06-2025,1,File Handling,3,Stressed
+29-06-2025,2,Numpy,3,Calm
+01-07-2025,2,Python Loops,3,Tired
+02-07-2025,3,Pandas,2,Happy
+03-07-2025,1,OOP,4,Stressed
+04-07-2025,2,Matplotlib,3,Calm
+05-07-2025,4,Seaborn,2,Happy
+06-07-2025,1,File Handling,3,Stressed
+07-07-2025,2,Numpy,3,Calm
+08-07-2025,2,SQL Basics,3,Calm
+09-07-2025,4,Flask,4,Happy
+10-07-2025,3,Data Cleaning,3,Focused
+11-07-2025,1,APIs,2,Tired
+12-07-2025,5,Django,4,Stressed
+13-07-2025,2,Data Structures,3,Calm
+14-07-2025,4,OOP Concepts,3,Happy
+15-07-2025,1,Streamlit,2,Calm
+16-07-2025,3,Statistics,4,Focused
+17-07-2025,2,AI Ethics,3,Calm
+18-07-2025,3,Python Functions,2,Calm
+19-07-2025,4,Pandas Advanced,3,Focused
+20-07-2025,1,SQL Joins,3,Calm
+21-07-2025,2,File Handling,2,Tired

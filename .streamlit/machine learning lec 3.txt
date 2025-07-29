@@ -1,0 +1,6 @@
+machine learning lec 3
+
+
+SVM- support vector machine
+
+plane- in maths 2d , line is 1d

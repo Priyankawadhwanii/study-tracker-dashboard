@@ -1,9 +1,2 @@
+study_tracker.db
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
-env/
-venv/
-.idea/
-.DS_Store
-data/study_data.csv
