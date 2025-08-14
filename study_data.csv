@@ -1,7 +1,10 @@
-Date,Topic,Hours,Mood,Target Hours
-29-07-2025,MATPLOTLIB,0.04,😊 Happy,0.5
-30-07-2025,sns,0.38,😴 Sleepy,1
-31-07-2025,pandas,0.01,😊 Happy,0.5
-02-08-2025,SVM,0.19,😊 Happy,0.25
-02-08-2025,Nueral network,2.29,😭 Sleepy,0.25
-02-08-2025,weights(intro),0.1,😤 Frustrated,0.25
+Date,Topic,Hours,Mood,Target Hours,Manual Hours
+29-07-2025,MATPLOTLIB,1.5,😊 Happy,1.5,
+30-07-2025,sns,0.38,😴 Sleepy,1,
+31-07-2025,pandas,1,😊 Happy,1.25,
+02-08-2025,SVM,1.75,😊 Happy,1.5,
+02-08-2025,Nueral network,2.29,😭 Sleepy,2,
+02-08-2025,weights(intro),0.5,😤 Frustrated,0.75,
+13-08-2025,Regression,2,😐 Neutral,1.75,
+13-08-2025,Decision tree,3,😐 Neutral,2,
+14-08-2025,algebra,0.31,😐 Neutral,1,
