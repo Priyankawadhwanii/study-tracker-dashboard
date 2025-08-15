@@ -137,11 +137,11 @@ if topic:
 
 use_timer = st.sidebar.checkbox("⏱️ Use Timer", value=True)
 
-
-
 # -------------- Timer (IST) --------------
 indian_tz = pytz.timezone("Asia/Kolkata")
 recorded_time = 0.0
+manual_hours = None   # <-- Add this line
+
 if use_timer:
     if st.sidebar.button("▶️ Start"):
         st.session_state.start_time = time.time()
@@ -166,8 +166,8 @@ else:
     manual_hours = st.sidebar.number_input("⏱️ Enter study hours manually", min_value=0.0, step=0.25)
     st.session_state.Hours = manual_hours
 
+target_hours = st.sidebar.number_input("🎯 Target Hours", min_value=0.0, step=0.25)
 
-target_hours = st.sidebar.number_input("🎯 Target Hours", min_value=0.0, step=0.25)    
 # -------------- Save row --------------
 if st.sidebar.button("💾 Save"):
     new_entry = pd.DataFrame({
