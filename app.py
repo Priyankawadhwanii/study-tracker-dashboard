@@ -176,7 +176,7 @@ if st.sidebar.button("💾 Save"):
         "Hours": [st.session_state.Hours],
         "Mood": [mood],
         "Target Hours": [target_hours],
-        "Manual Hours" : [manual_hours]
+        "Hours" : [manual_hours]
         
     })
     df = pd.concat([df, new_entry], ignore_index=True)
