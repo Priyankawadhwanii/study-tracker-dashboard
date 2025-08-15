@@ -175,7 +175,7 @@ if st.sidebar.button(" Save"):
         "Topic": [topic],
         "Hours": [st.session_state.Hours],
         "Mood": [mood],
-        "Target Hours": [target_hours],  
+        "Target Hours": [target_hours] 
     })
     df = pd.concat([df, new_entry], ignore_index=True)
     df.to_csv(csv_file, index=False)
