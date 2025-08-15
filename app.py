@@ -140,7 +140,7 @@ use_timer = st.sidebar.checkbox("⏱️ Use Timer", value=True)
 # -------------- Timer (IST) --------------
 indian_tz = pytz.timezone("Asia/Kolkata")
 recorded_time = 0.0
-manual_hours = None   # <-- Add this line
+manual_hours = None   
 
 if use_timer:
     if st.sidebar.button("▶️ Start"):
