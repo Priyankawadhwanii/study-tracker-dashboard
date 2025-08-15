@@ -39,7 +39,7 @@ if "show_toast" not in st.session_state:
 # ---------------- Load data ----------------
 csv_file = "study_data.csv"
 if os.path.exists(csv_file):
-    df = pd.read_csv(csv_file)
+    df = pd.read_csv(csv_file, parse_dates=["Date"], dayfirst=True)
     df["Date"] = pd.to_datetime(df["Date"]).dt.date
 else:
     df = pd.DataFrame(columns=["Date", "Topic", "Hours", "Mood", "Target Hours"])    
@@ -81,10 +81,17 @@ def recommend_target_hours(model, topic_avg_series, topic_name, chosen_target, m
     topic_avg_val = topic_avg_series.get(topic_name, topic_avg_series.mean() if len(topic_avg_series) > 0 else 0.5)
     day_of_week = pd.to_datetime(date_obj).dayofweek if date_obj is not None else 0
     mood_score = safe_mood_score(mood_str)
-    X_in = np.array([[topic_avg_val, float(chosen_target), int(day_of_week), int(mood_score)]])
+    X_in = pd.DataFrame(
+    [[topic_avg_val, float(chosen_target), int(day_of_week), int(mood_score)]],
+    columns=["topic_avg", "Target Hours", "day_of_week", "mood_score"]
+)
+
     pred_hours = float(model.predict(X_in)[0])
-    recommended = chosen_target if chosen_target >= pred_hours else round(pred_hours * 1.10, 2)
-    return round(pred_hours, 2), float(recommended)
+)
+  # Always base recommended on model prediction (not just copying target)
+    recommended = round(pred_hours * 1.10, 2)
+    return pred_hours, recommended
+
 
 def compute_topic_clusters(df, n_clusters=3):
     df_num = df.copy()
