@@ -87,7 +87,7 @@ def recommend_target_hours(model, topic_avg_series, topic_name, chosen_target, m
 )
 
     pred_hours = float(model.predict(X_in)[0])
-)
+
   # Always base recommended on model prediction (not just copying target)
     recommended = round(pred_hours * 1.10, 2)
     return pred_hours, recommended
@@ -143,7 +143,7 @@ recorded_time = 0.0
 manual_hours = None   
 
 if use_timer:
-    if st.sidebar.button("▶️ Start"):
+    if st.sidebar.button("Start"):
         st.session_state.start_time = time.time()
         st.session_state.start_clock_time = datetime.now(indian_tz).strftime('%H:%M:%S')
         st.success(f"Started recording study time at {st.session_state.start_clock_time} IST")
@@ -151,7 +151,7 @@ if use_timer:
     if st.session_state.start_time:
         st.sidebar.write(f"⏳ Time started at: {st.session_state.start_clock_time} IST")
 
-    if st.sidebar.button("⏹️ Stop"):
+    if st.sidebar.button("Stop"):
         if st.session_state.start_time:
             end_time = time.time()
             recorded_time = round((end_time - st.session_state.start_time) / 3600, 2)
@@ -169,15 +169,13 @@ else:
 target_hours = st.sidebar.number_input("🎯 Target Hours", min_value=0.0, step=0.25)
 
 # -------------- Save row --------------
-if st.sidebar.button("💾 Save"):
+if st.sidebar.button(" Save"):
     new_entry = pd.DataFrame({
         "Date": [study_date],
         "Topic": [topic],
         "Hours": [st.session_state.Hours],
         "Mood": [mood],
-        "Target Hours": [target_hours],
-        "Hours" : [manual_hours]
-        
+        "Target Hours": [target_hours],  
     })
     df = pd.concat([df, new_entry], ignore_index=True)
     df.to_csv(csv_file, index=False)
